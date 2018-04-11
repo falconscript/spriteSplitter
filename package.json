@@ -16,6 +16,7 @@
     "bluebird": "^3.4.0",
     "chai": "^3.5.0",
     "electron-canvas-to-buffer": "^2.0.0",
+    "electron-prompt": "^0.3.0",
     "mocha": "^2.5.3"
   }
 }

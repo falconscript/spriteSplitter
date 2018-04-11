@@ -1,7 +1,10 @@
 var canvasBuffer = require('electron-canvas-to-buffer')
 var fs = require('fs')
 var path = require('path')
+const prompt = require('electron-prompt');
+
 require('bluebird').promisifyAll(fs)
+
 
 angular.module('app', [])
 
@@ -18,8 +21,21 @@ angular.module('app')
         $scope.onFolderSelected = (event,element) => {
             $timeout(function(){
                 $scope.selectedFolder = event.target.files[0].path
-                frameService.saveSelections(spriteSplitter.selectedSelections, $scope.selectedFolder, onFramesSaved)
-                angular.element(element).val(null)
+
+                prompt({
+                    title: 'Enter an optional prefix for these sprite filenames',
+                    label: 'Prefix',
+                    value: '',
+                    //inputAttrs: {
+                    //    type: 'url'
+                    //}
+                })
+                .then((namePrefix) => {
+                    // namePrefix will be null if window was closed, or user clicked Cancel 
+                    frameService.saveSelections(spriteSplitter.selectedSelections, $scope.selectedFolder, namePrefix, onFramesSaved)
+                    angular.element(element).val(null)
+                })
+
             })
         }
         
@@ -68,7 +84,7 @@ angular.module('app')
 
     .factory('frameService', function(){
         return {
-            saveSelections: function(selections, folder, onSaveEnd){
+            saveSelections: function(selections, folder, namePrefix, onSaveEnd){
                 let index = 0
                 let saved = 0
                 selections.forEach(function(selection){
@@ -87,7 +103,7 @@ angular.module('app')
                     // write canvas to file
                     fs.existsSync(folder) || fs.mkdirSync(folder)
 
-                    fs.writeFileAsync(folder + '/' + index + '.png', buffer)
+                    fs.writeFileAsync(folder + '/' + namePrefix + index + '.png', buffer)
                         .then((response) => {
                             saved ++
                             if(saved === selections.length){
